@@ -263,3 +263,35 @@ yarn typeorm migration:run
   - This is because, interfaces are just types. They're not available under the runtime JavaScript. But classes are available
 - To get body from a request, we can use the `@Body` decorator
 - Properties in a DTO are generally `readonly`. This is because these are request payloads, and we shouldn't be changing those anytime
+
+# Additional Notes
+
+- Hash Passwords in Entity
+
+```ts
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { hash } from 'bcrypt';
+
+@Entity({ name: 'users' })
+export class UserEnitity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  email: string;
+
+  @Column({ default: '' })
+  bio: string;
+
+  @Column({ default: '' })
+  image: string;
+
+  @Column()
+  password: string;
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.password = await hash(this.password, 10);
+  }
+}
+```
