@@ -253,3 +253,13 @@ yarn typeorm migration:generate ./src/migrations/CreateTags
 ```sh
 yarn typeorm migration:run
 ```
+
+## DTO
+
+- Data Transfer Object
+- Requests have payloads. These are DTOs in NestJS
+- DTOs are useful for validations
+- They are class and not interfaces
+  - This is because, interfaces are just types. They're not available under the runtime JavaScript. But classes are available
+- To get body from a request, we can use the `@Body` decorator
+- Properties in a DTO are generally `readonly`. This is because these are request payloads, and we shouldn't be changing those anytime
