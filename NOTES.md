@@ -195,3 +195,61 @@ import { TagEntity } from '@app/tag/tag.entity';
 })
 export class TagModule {}
 ```
+
+## Migrations
+
+- `synchronize: true` is BAD.
+  - It might break in production
+  - Also other frameworkds do not have this
+- Migrations give a lot of power
+- Create a DataSource config. `config/ormDataSource.config.ts`
+
+```ts
+import ormconfig from '@app/config/orm.config';
+import { DataSource } from 'typeorm';
+
+export default new DataSource(ormconfig);
+```
+
+- Set `typeorm` and related scripts in the `package.json`
+
+```json
+{
+  "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/config/ormDataSource.config.ts",
+  "db:drop": "yarn typeorm schema:drop"
+}
+```
+
+- Update `config/orm.config.ts`
+
+```diff
+import * as path from 'path';
+import { DataSourceOptions } from 'typeorm';
+
+const ormconfig: DataSourceOptions = {
+  type: 'postgres',
+  host: 'localhost',
+  port: 5432,
+  username: 'realworlddbuser',
+  password: '123456',
+  database: 'realworld',
+  entities: [path.join(__dirname, '..', '/**/*.entity{.ts,.js}')],
+- synchronize: false, // sync database and create tables
++ synchronize: false, // sync database and create tables
++ migrations: [path.join(__dirname, '..', '/migrations/**/*{.ts,.js}')],
+};
+
+export default ormconfig;
+```
+
+- To generate a migration (Note: need to enter path of the migration and name within it, but do not inlude `.ts` on the end)
+
+```sh
+yarn typeorm migration:generate ./src/migrations/CreateTags
+```
+
+- To run the migration
+
+```sh
+yarn typeorm migration:run
+```

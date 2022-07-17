@@ -1,6 +1,8 @@
 import * as path from 'path';
 import { DataSourceOptions } from 'typeorm';
 
+// console.log(path.join(__dirname, '..', '/migrations/**/*.{.ts,.js}'));
+
 const ormconfig: DataSourceOptions = {
   type: 'postgres',
   host: 'localhost',
@@ -9,7 +11,8 @@ const ormconfig: DataSourceOptions = {
   password: '123456',
   database: 'realworld',
   entities: [path.join(__dirname, '..', '/**/*.entity{.ts,.js}')],
-  synchronize: true, // sync database and create tables
+  synchronize: false, // sync database and create tables
+  migrations: [path.join(__dirname, '..', '/migrations/**/*{.ts,.js}')],
 };
 
 export default ormconfig;
