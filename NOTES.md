@@ -264,6 +264,34 @@ yarn typeorm migration:run
 - To get body from a request, we can use the `@Body` decorator
 - Properties in a DTO are generally `readonly`. This is because these are request payloads, and we shouldn't be changing those anytime
 
+## Validations
+
+- Install the dependencies: `class-validator` and `class-transformer`
+- Use the following decorator on he controller
+
+```ts
+@UsePipes(new ValidationPipe())
+```
+
+- ValidationPipes work with DTOs
+- Update the DTO
+
+```ts
+import { IsNotEmpty, IsEmail } from 'class-validator';
+
+export class CreateUserDto {
+  @IsNotEmpty()
+  readonly username: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  readonly email: string;
+
+  @IsNotEmpty()
+  readonly password: string;
+}
+```
+
 # Additional Notes
 
 - Hash Passwords in Entity
@@ -304,4 +332,15 @@ async createUser(createUserDto: CreateUserDto): Promise<UserEnitity> {
     Object.assign(newUser, createUserDto);
     return await this.userRepository.save(newUser);
   }
+```
+
+- Error propagation
+
+```ts
+if (userByEmail || userByUsername) {
+  throw new HttpException(
+    'Email or username is already taken',
+    HttpStatus.UNPROCESSABLE_ENTITY,
+  );
+}
 ```
