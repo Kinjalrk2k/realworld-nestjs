@@ -295,3 +295,13 @@ export class UserEnitity {
   }
 }
 ```
+
+- Create row using TypeORM
+
+```ts
+async createUser(createUserDto: CreateUserDto): Promise<UserEnitity> {
+    const newUser = new UserEnitity();
+    Object.assign(newUser, createUserDto);
+    return await this.userRepository.save(newUser);
+  }
+```

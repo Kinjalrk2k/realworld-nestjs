@@ -5,9 +5,19 @@ import { TagModule } from '@app/tag/tag.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from '@app/user/user.module';
 import ormconfig from '@app/config/orm.config';
+import { ConfigModule } from '@nestjs/config';
+import * as path from 'path';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(ormconfig), TagModule, UserModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: path.join(__dirname, '.env'),
+    }),
+    TypeOrmModule.forRoot(ormconfig),
+    TagModule,
+    UserModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
