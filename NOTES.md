@@ -294,6 +294,8 @@ export class CreateUserDto {
 
 ## Middlewares
 
+> Middlewares should be `Injectable`
+
 - Middlewares can be defined under any module level, while be used globally or in any other module
 - To use a middleware, we need to register it in a module
 - Register middleware in a module
@@ -396,6 +398,49 @@ export const User = createParamDecorator((data: any, ctx: ExecutionContext) => {
     console.log('user', user);
 
     return this.userService.buildUserResponse(request.user);
+  }
+```
+
+## Gaurds
+
+> Guards should be `Injectable`
+
+- Guards are called after middleware
+- Returns boolean. `true` = We've access. `false` = We dont have access
+
+```ts
+import { ExpressRequest } from '@app/types/ExpressRequest.interface';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<ExpressRequest>();
+
+    if (request.user) {
+      return true;
+    }
+
+    throw new HttpException('Not authorized', HttpStatus.UNAUTHORIZED);
+  }
+}
+```
+
+- We must register it to every module we're using this. Add it to the `provider` list in the module
+- Next, we should use the Guard in the controller
+
+```diff
+  @Get('user')
++ @UseGuards(AuthGuard)
+  async currentUser(@User() user: UserEnitity): Promise<UserResponseInterface> {
+    return this.userService.buildUserResponse(user);
   }
 ```
 
