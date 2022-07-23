@@ -292,6 +292,75 @@ export class CreateUserDto {
 }
 ```
 
+## Middlewares
+
+- Middlewares can be defined under any module level, while be used globally or in any other module
+- To use a middleware, we need to register it in a module
+- Register middleware in a module
+
+```ts
+@Module({
+  imports: [TypeOrmModule.forRoot(ormconfig), TagModule, UserModule],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes({
+      path: '*',
+      method: RequestMethod.ALL,
+    });
+  }
+}
+```
+
+- To use a service outside a module, we'll need to export it in the module
+
+```diff
+@Module({
+  imports: [TypeOrmModule.forFeature([UserEnitity])],
+  controllers: [UserController],
+  providers: [UserService],
++ exports: [UserService],
+})
+export class UserModule {}
+```
+
+- Authentication Middleware
+
+```ts
+import { ExpressRequest } from '@app/types/ExpressRequest.interface';
+import { UserJwtPayload } from '@app/user/types/UserJwtPayload.interface';
+import { UserService } from '@app/user/user.service';
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
+import { verify } from 'jsonwebtoken';
+
+@Injectable()
+export class AuthMiddleware implements NestMiddleware {
+  constructor(private readonly userService: UserService) {}
+
+  async use(req: ExpressRequest, _: Response, next: NextFunction) {
+    if (!req.headers.authorization) {
+      req.user = null;
+      next();
+      return;
+    }
+
+    const token = req.headers.authorization.split(' ')[1];
+    try {
+      const decode = verify(token, process.env.JWT_SECRET) as UserJwtPayload;
+      const user = await this.userService.findById(decode.id);
+      req.user = user;
+      next();
+    } catch (err) {
+      req.user = null;
+      next();
+    }
+  }
+}
+```
+
 # Additional Notes
 
 - Hash Passwords in Entity
