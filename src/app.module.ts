@@ -8,9 +8,15 @@ import ormconfig from '@app/config/orm.config';
 import { ConfigModule } from '@nestjs/config';
 import * as path from 'path';
 import { AuthMiddleware } from '@app/user/middlewares/auth.middleware';
+import { ArticleModule } from '@app/article/article.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(ormconfig), TagModule, UserModule],
+  imports: [
+    TypeOrmModule.forRoot(ormconfig),
+    TagModule,
+    UserModule,
+    ArticleModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
