@@ -2,6 +2,7 @@ import { ExpressRequest } from '@app/types/ExpressRequest.interface';
 import { User } from '@app/user/decorators/user.decorator';
 import { CreateUserDto } from '@app/user/dto/CreateUser.dto';
 import { LoginUserDto } from '@app/user/dto/LoginUser.dto';
+import { UpdateUserDto } from '@app/user/dto/UpdateUser.dto';
 import { AuthGuard } from '@app/user/guards/auth.guard';
 import { UserResponseInterface } from '@app/user/types/UserResponse.interface';
 import { UserEnitity } from '@app/user/user.entity';
@@ -11,6 +12,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Req,
   UseGuards,
   UsePipes,
@@ -44,5 +46,18 @@ export class UserController {
   @UseGuards(AuthGuard)
   async currentUser(@User() user: UserEnitity): Promise<UserResponseInterface> {
     return this.userService.buildUserResponse(user);
+  }
+
+  @Put('user')
+  @UseGuards(AuthGuard)
+  async updateUser(
+    @User('id') currentUserId: number,
+    @Body('user') updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseInterface> {
+    const updatedUser = await this.userService.updateUser(
+      currentUserId,
+      updateUserDto,
+    );
+    return this.userService.buildUserResponse(updatedUser);
   }
 }

@@ -7,6 +7,7 @@ import { sign } from 'jsonwebtoken';
 import { UserResponseInterface } from '@app/user/types/UserResponse.interface';
 import { LoginUserDto } from '@app/user/dto/LoginUser.dto';
 import { compare } from 'bcrypt';
+import { UpdateUserDto } from '@app/user/dto/UpdateUser.dto';
 
 @Injectable()
 export class UserService {
@@ -69,6 +70,15 @@ export class UserService {
     return this.userRepository.findOne({ where: { id } });
   }
 
+  async updateUser(
+    userId: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserEnitity> {
+    const user = await this.findById(userId);
+    Object.assign(user, updateUserDto);
+    return await this.userRepository.save(user);
+  }
+
   generateJwt(user: UserEnitity): string {
     return sign(
       { id: user.id, username: user.username, email: user.email },
@@ -77,6 +87,8 @@ export class UserService {
   }
 
   buildUserResponse(user: UserEnitity): UserResponseInterface {
+    delete user.password;
+
     return {
       user: { ...user, token: this.generateJwt(user) },
     };
