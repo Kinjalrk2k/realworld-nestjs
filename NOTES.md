@@ -361,9 +361,47 @@ export class AuthMiddleware implements NestMiddleware {
 }
 ```
 
+## Custom decorator
+
+- Sugaring on params
+
+```ts
+import { ExpressRequest } from '@app/types/ExpressRequest.interface';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+
+export const User = createParamDecorator((data: any, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest<ExpressRequest>();
+
+  if (!request.user) {
+    return null;
+  }
+
+  if (data) {
+    return request.user[data];
+  }
+
+  return request.user;
+});
+```
+
+- In the controller
+
+```ts
+
+  @Get('user')
+  async currentUser(
+    @Req() request: ExpressRequest,
+    @User() user: UserEnitity,
+  ): Promise<UserResponseInterface> {
+    console.log('user', user);
+
+    return this.userService.buildUserResponse(request.user);
+  }
+```
+
 # Additional Notes
 
-- Hash Passwords in Entity
+### Hash Passwords in Entity
 
 ```ts
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
@@ -393,7 +431,7 @@ export class UserEnitity {
 }
 ```
 
-- Create row using TypeORM
+### Create row using TypeORM
 
 ```ts
 async createUser(createUserDto: CreateUserDto): Promise<UserEnitity> {
@@ -403,7 +441,7 @@ async createUser(createUserDto: CreateUserDto): Promise<UserEnitity> {
   }
 ```
 
-- Error propagation
+### Error propagation
 
 ```ts
 if (userByEmail || userByUsername) {
