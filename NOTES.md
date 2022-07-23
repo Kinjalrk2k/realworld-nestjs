@@ -444,6 +444,22 @@ export class AuthGuard implements CanActivate {
   }
 ```
 
+## Relations in TypeORM
+
+- On `UserEntity`
+
+```ts
+@OneToMany(() => ArticleEntity, (article) => article.author)
+articles: ArticleEntity[];
+```
+
+- On `ArticleEntity`
+
+```ts
+@ManyToOne(() => UserEnitity, (user) => user.articles)
+  author: UserEnitity;
+```
+
 # Additional Notes
 
 ### Hash Passwords in Entity
