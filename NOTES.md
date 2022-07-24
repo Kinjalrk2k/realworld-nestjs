@@ -457,10 +457,17 @@ articles: ArticleEntity[];
 
 ```ts
 @ManyToOne(() => UserEnitity, (user) => user.articles, { eager: true })
-  author: UserEnitity;
+author: UserEnitity;
 ```
 
 - `{ eager: true }` specifies that the relations should be automaticlly populated
+- For many-to-many relations
+
+```ts
+@ManyToMany(() => ArticleEntity)
+@JoinTable()
+favorites: ArticleEntity[];
+```
 
 # Additional Notes
 
