@@ -3,6 +3,7 @@ import { CreateArticleDto } from '@app/article/dto/CreateArticle.dto';
 import { FindAllQueryDto } from '@app/article/dto/FindAllArticlesQuery.dto';
 import { ArticleResponseInterface } from '@app/article/types/ArticleResponse.interface';
 import { ArticlesResponseInterface } from '@app/article/types/ArticlesResponse.interface';
+import { BackendValidationPipe } from '@app/common/pipes/BackendValidation.pipe';
 import { User } from '@app/user/decorators/user.decorator';
 import { AuthGuard } from '@app/user/guards/auth.guard';
 import { UserEnitity } from '@app/user/user.entity';
@@ -45,7 +46,7 @@ export class ArticleController {
 
   @Post()
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new BackendValidationPipe())
   async create(
     @User() currentUser: UserEnitity,
     @Body('article') createArticleDto: CreateArticleDto,
@@ -76,7 +77,7 @@ export class ArticleController {
 
   @Put(':slug')
   @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new BackendValidationPipe())
   async updateArticle(
     @User('id') currentUserId: number,
     @Param('slug') slug: string,
