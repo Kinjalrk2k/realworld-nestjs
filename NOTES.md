@@ -456,9 +456,11 @@ articles: ArticleEntity[];
 - On `ArticleEntity`
 
 ```ts
-@ManyToOne(() => UserEnitity, (user) => user.articles)
+@ManyToOne(() => UserEnitity, (user) => user.articles, { eager: true })
   author: UserEnitity;
 ```
+
+- `{ eager: true }` specifies that the relations should be automaticlly populated
 
 # Additional Notes
 
