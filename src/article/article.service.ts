@@ -8,6 +8,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import slugify from 'slugify';
 import { ArticlesResponseInterface } from '@app/article/types/ArticlesResponse.interface';
 import { FindAllQueryDto } from '@app/article/dto/FindAllArticlesQuery.dto';
+import { FollowEntity } from '@app/profile/Follow.entity';
 
 @Injectable()
 export class ArticleService {
@@ -16,6 +17,8 @@ export class ArticleService {
     private readonly articleRepository: Repository<ArticleEntity>,
     @InjectRepository(UserEnitity)
     private readonly userRepository: Repository<UserEnitity>,
+    @InjectRepository(FollowEntity)
+    private readonly followRepository: Repository<FollowEntity>,
   ) {}
 
   async findAll(
@@ -67,6 +70,45 @@ export class ArticleService {
 
     const articlesCount = await queryBuilder.getCount();
     const articles = await queryBuilder.getMany();
+
+    const articleWithFavorited = articles.map((article) => {
+      const favorited = favoriteIds.includes(article.id);
+      return { ...article, favorited };
+    });
+
+    return { articles: articleWithFavorited, articlesCount };
+  }
+
+  async getFeed(
+    currentUserId: number,
+    query: FindAllQueryDto,
+  ): Promise<ArticlesResponseInterface> {
+    const follows = await this.followRepository.find({
+      where: { followerId: currentUserId },
+    });
+
+    if (follows.length === 0) {
+      return { articles: [], articlesCount: 0 };
+    }
+
+    const followingUserIds = follows.map((follow) => follow.followingId);
+
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('articles')
+      .leftJoinAndSelect('articles.author', 'author')
+      .where('articles.authorId IN (:...ids)', { ids: followingUserIds })
+      .orderBy('articles.createdAt', 'DESC')
+      .limit(query.limit)
+      .offset(query.offset);
+
+    const articlesCount = await queryBuilder.getCount();
+    const articles = await queryBuilder.getMany();
+
+    const currentUser = await this.userRepository.findOne({
+      where: { id: currentUserId },
+      relations: ['favorites'],
+    });
+    const favoriteIds = currentUser.favorites.map((favorite) => favorite.id);
 
     const articleWithFavorited = articles.map((article) => {
       const favorited = favoriteIds.includes(article.id);
